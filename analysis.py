@@ -67,7 +67,12 @@ state_names = [x for x in us_state_to_abbrev.keys()]
 def grep_name(y, state_names):
     res = [x if x in y else "" for x in state_names]
     if all([len(x) == 0 for x in res]):
-        manual_key = {"UT Austin": "Texas", "UW": "Washington"}
+        manual_key = {
+            "UT Austin": "Texas",
+            "UW": "Washington",
+            "UPenn": "Pennsylvania",
+            "CU Boulder": "Colorado",
+        }
         return manual_key[y]
 
     res = [x for x in itertools.compress(res, [len(x) > 0 for x in res])][0]
@@ -92,16 +97,30 @@ unis = dt[["University of" in x for x in dt["InstitutionName"]]].copy()
 unis = unis[[any([x in y for x in state_names]) for y in unis["InstitutionName"]]]
 #
 unis_manual = dt[
-    [x in ["UT Austin", "Ohio University", "UW"] for x in dt["InstitutionName"]]
+    [
+        x
+        in [
+            "UT Austin",
+            "Ohio University",
+            "UW",
+            "UPenn",
+            "Indiana University Bloomington",
+            "CU Boulder",
+        ]
+        for x in dt["InstitutionName"]
+    ]
 ].copy()
 unis = pd.concat([unis_manual, unis])
 unis.loc[:, "state"] = [grep_name(y, state_names) for y in unis["InstitutionName"]]
 unis = unis.sort_values("OrdinalPrestigeRank")
+unis = unis[
+    [x != "Indiana University of Pennsylvania" for x in unis["InstitutionName"]]
+]
 unis = unis.drop_duplicates("state")
 unis = unis[["InstitutionName", "OrdinalPrestigeRank", "state"]]
 
 # ---
-# dt[["UW" in x for x in dt["InstitutionName"]]].head()
+# dt[["Colorado" in x for x in dt["InstitutionName"]]].head()
 
 res = states.merge(unis, how="left", on=["state"])
 sum(res["OrdinalPrestigeRank_x"] < res["OrdinalPrestigeRank_y"])
