@@ -1,5 +1,8 @@
 import itertools
+import numpy as np
 import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 # https://gist.github.com/rogerallen/1583593
 us_state_to_abbrev = {
@@ -123,6 +126,49 @@ unis = unis[["InstitutionName", "OrdinalPrestigeRank", "state"]]
 # dt[["Colorado" in x for x in dt["InstitutionName"]]].head()
 
 res = states.merge(unis, how="left", on=["state"])
-sum(res["OrdinalPrestigeRank_x"] < res["OrdinalPrestigeRank_y"])
+# sum(res["OrdinalPrestigeRank_x"] < res["OrdinalPrestigeRank_y"])
+# res[res["OrdinalPrestigeRank_y"] > res["OrdinalPrestigeRank_x"]]
+res["state_minus_uni"] = res["OrdinalPrestigeRank_x"] - res["OrdinalPrestigeRank_y"]
+res["state_minus_uni_abs"] = abs(
+    res["OrdinalPrestigeRank_x"] - res["OrdinalPrestigeRank_y"]
+)
+res["min_rank"] = (
+    res[["OrdinalPrestigeRank_x", "OrdinalPrestigeRank_y"]].apply(min, axis=1).values
+)
+res = res.sort_values("OrdinalPrestigeRank_y", ascending=False)
 
-res[res["OrdinalPrestigeRank_y"] > res["OrdinalPrestigeRank_x"]]
+# --- make "lollipop" plot
+viridis = mpl.colormaps["viridis"].resampled(2)
+cmap_hexs = [mpl.colors.rgb2hex(c) for c in viridis.colors]
+conditional_hexs = np.where(
+    res["state_minus_uni"] > 0,
+    "#ffa600",
+    np.where(res["state_minus_uni"] > 0, "#f95d6a", "#a05195"),
+)
+
+plt.close()
+fig = plt.figure(figsize=(12, 10))
+plt.hlines(
+    y=res["state"],
+    xmin=res["OrdinalPrestigeRank_x"],
+    xmax=res["OrdinalPrestigeRank_y"],
+    color=conditional_hexs,
+    linewidth=3,
+    alpha=0.8,
+)
+plt.scatter(
+    res["OrdinalPrestigeRank_x"],
+    range(0, len(res)),
+    color=conditional_hexs,
+    s=80,
+    alpha=1,
+)
+plt.scatter(
+    res["OrdinalPrestigeRank_y"],
+    range(0, len(res)),
+    color=conditional_hexs,
+    s=80,
+    alpha=1,
+)
+plt.title("Prestige Rank")
+plt.show()
