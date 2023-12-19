@@ -1,1 +1,3 @@
-# prestige_state-v-uni
+## Comparing State versus University Prestige
+
+See <https://larremorelab.github.io/us-faculty/>

@@ -171,4 +171,5 @@ plt.scatter(
     alpha=1,
 )
 plt.title("Prestige Rank")
-plt.show()
+# plt.show()
+plt.savefig("figures/lollipop.png")
