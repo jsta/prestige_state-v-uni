@@ -90,7 +90,8 @@ dt = pd.read_csv("us-faculty-hiring-networks/data/institution-stats.csv")
 
 
 def lollipop_plot(dt, taxonomy_level="Academia", outpath="figures/lollipop.png"):
-    dt = dt[dt["TaxonomyLevel"] == taxonomy_level].sort_values("OrdinalPrestigeRank")
+    # breakpoint()
+    dt = dt[dt["TaxonomyValue"] == taxonomy_level].sort_values("OrdinalPrestigeRank")
 
     # ---
     state_names = _state_names()
@@ -182,9 +183,10 @@ def lollipop_plot(dt, taxonomy_level="Academia", outpath="figures/lollipop.png")
         s=80,
         alpha=1,
     )
-    plt.title("Prestige Rank")
+    plt.title("Prestige Rank (" + taxonomy_level + ")")
     # plt.show()
     plt.savefig(outpath)
 
 
-lollipop_plot(dt)
+lollipop_plot(dt, "Academia", outpath="figures/lollipop_academia.png")
+lollipop_plot(dt, "Natural Sciences", outpath="figures/lollipop_natural.png")
